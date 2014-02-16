@@ -15,8 +15,8 @@ def replace_tags(line)
 		"{\\u1}"=>"<u>",
 		"{\\u0}"=>"</u>",
 		"{\\b1}"=>"<b>",
-		"{\\b0}"=>"</b>",
-		"\\N"=>""
+		"{\\b0}"=>"</b>"
+		# "\\N"=>""
 	}
 
 
@@ -34,7 +34,7 @@ def replace_braces(line)
 
 	line = line.gsub(/\{[\w\W]+\}/,"")
 	# line = line.gsub("}", "; ")
-
+	line = line.gsub(/(\\N)+/) { "\n" }
 	return line
 
 end
@@ -69,16 +69,12 @@ def get_styles(line)
 end
 
 # Set SRT format
-def set_srt_formatting(line)
-	new_line = ""
-	regex = /Dialogue: *\d+, *(\d+:\d+:\d+).(\d+), *(\d+:\d+:\d+).(\d+), *([^,]+), *([^,]*), *\d{4},\d{4},\d{4}, *[^,]*, *(.*)$/
-	#If Dialogue line is found
-	if line.scan(regex).length > 0
-		match = line.scan(regex)
-		new_line = "#{@subtitle_counter}\n0#{match[0][0]},0#{match[0][1]} --> 0#{match[0][2]},0#{match[0][3]}\n#{match[0][6]}\n\n"
-		@subtitle_counter += 1
-		print new_line
-	end
+def set_srt_formatting(dialogue)
+	style = @styles.detect {|style| style[:name] == dialogue[:style] }
+	new_line = "#{@subtitle_counter}\n#{dialogue[:show_time]} --> #{dialogue[:hide_time]}\n<font color=\"\##{style[:font_color]}\">#{dialogue[:dialogue]}<\/font>\n\n"
+	@subtitle_counter += 1
+		
+	
 
 		
 	return new_line
@@ -86,11 +82,37 @@ def set_srt_formatting(line)
 end
 
 
+# Parse and sort dialogues
+def parse_dialogue(line)
+	new_dialogue = Hash.new
+	regex = /Dialogue: *\d+, *(\d+:\d+:\d+).(\d+), *(\d+:\d+:\d+).(\d+), *([^,]+), *([^,]*), *\d{4},\d{4},\d{4}, *[^,]*, *(.*)/m
+	#If Dialogue line is found
+	if line.scan(regex).length > 0
+		match = line.scan(regex)
+		new_dialogue = {
+			:counter => @subtitle_counter,
+			:show_time => "#{match[0][0]},#{match[0][1]}",
+			:hide_time => "#{match[0][2]},#{match[0][3]}",
+			:style => "#{match[0][4]}",
+			:dialogue => "#{match[0][6]}"
+		}
+		
+		@subtitle_counter += 1
+		
+
+	end
+
+		
+	return new_dialogue
+
+end
+
 
 # For each file defined as arguments
 ARGV.each do|arg|
 
 	filename = arg
+	dialogues = []
 
 	f = File.open(arg)
 
@@ -98,26 +120,38 @@ ARGV.each do|arg|
 		line = replace_tags(line)
 		line = get_styles(line)
 		line = replace_braces(line)
-		line = set_srt_formatting(line)
-		if line.length > 0
-			@new_file.push(line)	
-
-		
+		# print line
+		dialogue = parse_dialogue(line)
+		if dialogue.length > 0
+			dialogues.push(dialogue)	
 		end
 		
+		# line = set_srt_formatting(line)
+		# if line.length > 0
+			# @new_file.push(line)	
+
+
+		# end
+
+
 
 	end
 
 	f.close  
 
+	@subtitle_counter = 1
 
+	da = dialogues.sort_by { |d| d[:show_time] }
 
+	da.each do |d| 
+		@new_file.push(set_srt_formatting(d))
+	end
 
 	srt_filename = filename.gsub(/.ass/,".srt")
 
-	# print "Filename #{srt_filename}"
+	print "Filename #{srt_filename}"
 
-	# puts File.exists? srt_filename
+	puts File.exists? srt_filename
 
 	File.open(srt_filename, 'w:UTF-8') do |srt_file|
 		@new_file.each do |new_line|
