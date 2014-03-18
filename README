@@ -1,8 +1,9 @@
-==MKV SRT Extractor==
+#MKV SRT Extractor
 
-A Ruby script that extracts ASS subtitles from MKV containers and converts them to SRT subtitles
+A Ruby script that extracts ASS subtitles from MKV containers using MKVtoolnix and converts them to SRT subtitles
 
-===Usage===
+##Requirements
+[MKVToolnix](http://www.bunkus.org/videotools/mkvtoolnix/) 
 
+##Usage
 `ruby SRTExtractor /path/to/directory/` directory where the .mkv files are.
-
