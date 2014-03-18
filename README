@@ -4,6 +4,5 @@ A Ruby script that extracts ASS subtitles from MKV containers and converts them 
 
 ===Usage===
 
- `ruby SRTExtractor __/path/to/directory/__` directory where the .mkv files are.
+`ruby SRTExtractor /path/to/directory/` directory where the .mkv files are.
 
- 
