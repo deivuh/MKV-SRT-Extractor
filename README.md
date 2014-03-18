@@ -7,7 +7,7 @@ A Ruby script that extracts ASS subtitles from MKV containers using MKVtoolnix a
 
 ##Usage
 
-On terminal run `ruby SRTExtractor /path/to/directory` directory where the .mkv files are.
+On terminal run `ruby SRTExtractor.rb /path/to/directory` directory where the .mkv files are.
 
 Follow onscreen instructions
 
