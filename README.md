@@ -17,7 +17,7 @@ Follow onscreen instructions
 
 
 
-
+##License
 
 MKV-SRT-Extractor Copyright (C) 2014  David Hsieh
 
